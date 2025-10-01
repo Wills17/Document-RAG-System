@@ -50,5 +50,5 @@ def chat_with_file(file_path):
 
 if __name__ == "__main__":
     # Example: replace with any text file path you upload
-    file_path = "dataset.txt"  # e.g., a .txt or .md file
+    file_path = "dataset/Stack vs Heap Memory.txt"
     chat_with_file(file_path)
