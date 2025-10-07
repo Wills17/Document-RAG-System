@@ -114,7 +114,7 @@ async function handleFile(file) {
         return;
     }
 
-    uploadContent.innerHTML = '<div class="spinner"></div><p style="font-weight: 600;">Processing document...</p>';
+    uploadContent.innerHTML = '<div class="spinner"></div><p style="font-weight: 600;">Please hold, your document is being processed...</p>';
 
     const formData = new FormData();
     formData.append('file', file);
@@ -190,7 +190,7 @@ function resetUpload() {
 
 
 
-// Chatbot Handling and replies
+// Chatbot handling and replies
 
 async function sendMessage() {
     const apiKey = localStorage.getItem('gemini_api_key');
@@ -281,3 +281,5 @@ chatInput.addEventListener('keypress', (e) => {
         sendMessage();
     }
 });
+
+// End

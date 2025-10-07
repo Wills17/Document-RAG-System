@@ -126,7 +126,7 @@
             color: var(--muted-foreground);
         }
 
-        /* Help modal styling */
+/* Help modal styling */
 .help-modal {
     position: fixed;
     inset: 0;
@@ -248,56 +248,6 @@
             height: 2rem;
             color: var(--primary-foreground);
         }
-
-        /* Default two-column layout */
-.two-column {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    transition: all 0.5s ease-in-out;
-}
-
-/* Upload card normal state */
-.upload-card {
-    transition: all 0.5s ease-in-out;
-}
-
-/* Chat card normal state */
-.chat-card {
-    transition: all 0.5s ease-in-out;
-}
-
-/* When file is uploaded — activate this layout */
-.layout-uploaded .two-column {
-    grid-template-columns: 1fr; /* make single column */
-}
-
-/* Shrink and move upload section */
-.layout-uploaded .upload-card {
-    max-height: 160px;
-    padding: 1rem;
-    transform: scale(0.98);
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Expand chat section to fill space */
-.layout-uploaded .chat-card {
-    height: 75vh;
-    transition: height 0.5s ease-in-out;
-}
-
-/* Optional visual polish */
-.upload-card.compact h2 {
-    font-size: 1rem;
-}
-.upload-card.compact p {
-    font-size: 0.8rem;
-}
-
 
         .upload-header h2 {
             font-size: 1.5rem;
