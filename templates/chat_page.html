@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini RAG Chatbot - AI Document Intelligence</title>
+    <meta name="description" content="Upload documents and chat with AI. Get instant answers from your PDFs and text files using advanced RAG technology powered by Gemini AI.">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/scripts.js" defer></script>
+</head>
+
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <div class="header-title">
+                    <h1>Gemini RAG Chatbot</h1>
+                    <p>AI-Powered Document Intelligence</p>
+                </div>
+            </div>
+            <div class="api-key-section">
+
+                <!-- api key info -->
+                <button id="help-btn" class="btn btn-ghost" title="How to get your API key">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 015.82 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12" y2="17"/>
+                    </svg>
+                </button>
+
+               <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="password" id="api-key-input" class="api-key-input" placeholder="Enter your Gemini API Key here">
+
+                    <button class="btn btn-gradient" id="save-api-key-btn" onclick="saveApiKey()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                        Save
+                    </button>
+                </div>
+            </div>
+
+            <!-- how to get api-key, help -->
+            <div id="help-modal" class="help-modal" style="display: none;">
+                <div class="help-content">
+                    <h3>How to Get Your Gemini API Key</h3>
+                    <ol>
+                        <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.</li>
+                        <li>Sign in with your Google account.</li>
+                        <li>Click <b>“Create API Key”</b>.</li>
+                        <li>Copy your key and paste it into the input box here.</li>
+                    </ol>
+                    <p><b>Note:</b> Your API key is stored locally on your device only, no where else.</p>
+                    <button class="btn btn-gradient" id="close-help-btn">Got it</button>
+                </div>
+            </div>
+
+        </div>
+</header>
+
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <div class="hero">
+            <h2>Chat with Your Documents</h2>
+            <p>Upload any PDF or text document and ask questions. The AI-powered RAG system will help you find answers instantly based on your uploaded file.</p>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="two-column">
+            <!-- Upload Section -->
+            <div id="upload-section" class="card upload-card" style="animation-delay: 100ms;">
+                <div class="upload-header">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                    </div>
+                    <h2>Upload Document</h2><br>
+                    <p>Upload a PDF or TXT file to start chatting with your document</p>
+                </div>
+
+                <div id="drop-zone" class="drop-zone">
+                    <svg id="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    <div id="upload-content">
+                        <h3>Drop your file here</h3>
+                        <p>or</p>
+                        <label for="file-input">
+                            <button class="btn btn-gradient" onclick="document.getElementById('file-input').click(); return false;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                </svg>
+                                Choose File
+                            </button>
+                        </label>
+                        <p style="margin-top: 1rem; font-size: 0.75rem;">Supports PDF and TXT files</p>
+                    </div>
+                </div>
+                <input type="file" id="file-input" accept=".pdf,.txt">
+            </div>
+
+            <!-- Chat Section -->
+            <div id="chat-section" class="card chat-card" style="animation-delay: 200ms;">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                        </div>
+                        <div class="chat-info">
+                            <h3>RAG Assistant</h3>
+                            <p id="chat-status">No document uploaded</p>
+                        </div>
+                    </div>
+
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-empty">
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                </svg>
+                                <h3>Upload a Document First</h3>
+                                <p>Please upload a PDF or TXT file to start asking questions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input">
+                        <input type="text" id="chat-input" placeholder="Ask a question about your document..." disabled>
+                        <button class="btn btn-gradient btn-icon" id="send-btn" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon" style="background: var(--gradient-accent);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <h3>Multiple Formats</h3>
+                <p>Support for PDF and TXT documents with seamless processing</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="13 17 18 12 13 7"/>
+                        <polyline points="6 17 11 12 6 7"/>
+                    </svg>
+                </div>
+                <h3>Instant Answers</h3>
+                <p>Get accurate, context-aware responses powered by Gemini AI</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Powered by Gemini AI • Built by <a href="https://github.com/Wills17" target="_blank" style="color: var(--accent);">Wills17</a></p>
+    </footer>
+
+</body>
+</html>
