@@ -1,7 +1,6 @@
 """Flask App script for RAG chatbot (using API key from frontend input)"""
 
 # import necessary libraries
-import os
 import tempfile
 from flask import Flask, request, jsonify, render_template
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -140,5 +139,7 @@ def chat():
     return jsonify({"answer": response.strip()})
 
 
+# run app
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
