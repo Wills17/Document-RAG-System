@@ -1,18 +1,11 @@
 """Flask App script for RAG chatbot (using API key from frontend)"""
 
-# import necessary libraries
+# import necessary libraries (others will be imported inside routes to save memory)
+import gc
+import os
 import re
 import tempfile
 from flask import Flask, request, jsonify, render_template
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import TextLoader, PyPDFLoader
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableParallel, RunnableLambda, RunnablePassthrough
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from langchain_huggingface import HuggingFaceEmbeddings
 
 
 # Flask app
@@ -22,8 +15,8 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 # Globals states
 retriever = None
 LLM_model = None
-messages = []
 api_key = None  # API key will come from frontend
+
 
 # set sytem message
 SYSTEM_MESSAGE = """
@@ -47,7 +40,15 @@ def home():
 @app.route("/upload", methods=["POST"])
 def upload_file():
     global retriever, LLM_model, messages, api_key
-
+    
+    # other imports inside route to save memory
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    from langchain_community.vectorstores import FAISS
+    from langchain_community.document_loaders import TextLoader, PyPDFLoader
+    from langchain_huggingface import HuggingFaceEmbeddings
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    
+    
     api_key = request.form.get("apiKey")
     if not api_key:
         return "API key missing!", 400
@@ -59,12 +60,12 @@ def upload_file():
     if file.filename == "":
         return "Empty filename", 400
 
-    # Save uploaded file temporarily
+    # save uploaded file temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file.filename.split('.')[-1]}") as tmp_file:
         file.save(tmp_file.name)
         file_path = tmp_file.name
 
-    # Load document file
+    # load document file and split
     if file.filename.lower().endswith(".pdf"):
         loader = PyPDFLoader(file_path)
     else:
@@ -81,22 +82,33 @@ def upload_file():
 
 
     # Embeddings and retriever
-    embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}) # force to use CPU
+    embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L3-v2") # switched to smalleer and faster model embeddings
     vector_store = FAISS.from_documents(chunks, embeds)
-    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
 
     # Initialize chat model with API key from user
     LLM_model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key)
+    
+    # Clean up memory
+    del documents, chunks, vector_store
+    gc.collect()
 
-    # add system message
-    messages = [SystemMessage(content=SYSTEM_MESSAGE)]
+    
     return "Document processed! You can now ask questions."
 
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    global retriever, LLM_model, messages
+    global retriever, LLM_model
+    
+    # remaining imports
+    from langchain_core.prompts import PromptTemplate
+    from langchain_core.runnables import RunnableParallel, RunnableLambda, RunnablePassthrough
+    from langchain_core.output_parsers import StrOutputParser
+    from langchain_core.messages import AIMessage, HumanMessage
+    
+
     if retriever is None or LLM_model is None:
         return jsonify({"error": "Please upload a document first."}), 400
 
@@ -112,11 +124,12 @@ def chat():
     context_text = "\n\n".join(document.page_content for document in retrieved_documents)
 
     prompt_template = PromptTemplate(
-        template="""You are answering based on this document:
-
-        {context}
-
-        Question: {question}""",
+        template=(
+            "You are answering strictly based on this document.\n\n"
+            "{context}\n\n"
+            "Question: {question}\n\n",
+            "Answer:"
+        ),
         input_variables=["context", "question"],
     )
 
@@ -127,20 +140,25 @@ def chat():
 
     parser = StrOutputParser()
     
-    
     # combine all to one chain
     main_chain = parallel_chain | prompt_template | LLM_model | parser
 
-    response = ""
-    for chunk in main_chain.stream(question):
-        response += chunk
-        
+    try:
+        # Get single response (no stream)
+        response = main_chain.invoke(question).strip()
+    except Exception as e:
+        response = f"Error generating response: {str(e)}"
+
+
     # Clean up markdown symbols
     cleaned_response = re.sub(r'\*\*(.*?)\*\*', r'\1', response.strip())
     cleaned_response = re.sub(r'\*(.*?)\*', r'\1', cleaned_response)
 
-    messages.append(AIMessage(content=cleaned_response))
+    
+    gc.collect()
     return jsonify({"answer": cleaned_response})
+
+
 
 # run app
 if __name__ == "__main__":
