@@ -1,4 +1,4 @@
-"""Flask App script for RAG chatbot (using API key from frontend, optimized for low memory)"""
+"""Flask App script for RAG chatbot (optimize for low memory)"""
 
 import gc
 import os
