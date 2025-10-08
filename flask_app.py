@@ -15,7 +15,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 
 # Flask app
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
 
 # Globals states
@@ -139,7 +139,7 @@ def chat():
     return jsonify({"answer": response.strip()})
 
 
-# run app
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+# # run app
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5000, debug=True)
 
