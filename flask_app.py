@@ -1,6 +1,7 @@
-"""Flask App script for RAG chatbot (using API key from frontend input)"""
+"""Flask App script for RAG chatbot (using API key from frontend)"""
 
 # import necessary libraries
+import re
 import tempfile
 from flask import Flask, request, jsonify, render_template
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -34,7 +35,6 @@ Rules:
 2. If the answer is not in the document, clearly say you don't know.
 3. Keep responses friendly, clear, and concise.
 4. Go straight to the point and avoid unnecessary information unless told otherwise.
-5. Ignore or remove characters like "**" or "##" in your replies when responding.
 """
 
 
@@ -81,7 +81,7 @@ def upload_file():
 
 
     # Embeddings and retriever
-    embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", model_kwargs={"device": "cpu"}) # force to use CPU
     vector_store = FAISS.from_documents(chunks, embeds)
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 5})
 
@@ -121,7 +121,7 @@ def chat():
     )
 
     parallel_chain = RunnableParallel({
-        "context": retriever | RunnableLambda(lambda docs: "\n\n".join(d.page_content for d in docs)),
+        "context": retriever | RunnableLambda(lambda documents: "\n\n".join(doc.page_content for doc in documents)),
         "question": RunnablePassthrough(),
     })
 
@@ -134,12 +134,15 @@ def chat():
     response = ""
     for chunk in main_chain.stream(question):
         response += chunk
+        
+    # Clean up markdown symbols
+    cleaned_response = re.sub(r'\*\*(.*?)\*\*', r'\1', response.strip())
+    cleaned_response = re.sub(r'\*(.*?)\*', r'\1', cleaned_response)
 
-    messages.append(AIMessage(content=response.strip()))
-    return jsonify({"answer": response.strip()})
+    messages.append(AIMessage(content=cleaned_response))
+    return jsonify({"answer": cleaned_response})
 
-
-# # run app
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000, debug=True)
+# run app
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
 
