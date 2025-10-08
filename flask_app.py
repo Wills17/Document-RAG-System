@@ -75,7 +75,7 @@ def upload_file():
     chunks = splitter.split_documents(documents)
 
     # Embeddings and retriever
-    embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L3-v2")
+    embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
     vector_store = FAISS.from_documents(chunks, embeds)
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
