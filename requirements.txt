@@ -10,7 +10,7 @@ langchain-text-splitters==0.3.11
 sentence-transformers==2.2.2
 transformers==4.44.2
 huggingface-hub==0.25.2
-torch==2.2.2
+torch==2.7.1
 
 faiss-cpu==1.7.4
 
