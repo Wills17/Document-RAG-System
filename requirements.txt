@@ -1,15 +1,14 @@
 Flask
 gunicorn
-
-langchain==0.3.27
-langchain-core==0.3.78
-langchain-community==0.3.31
-langchain-huggingface==0.3.1
-langchain-google-genai==2.1.12
-langchain-text-splitters==0.3.11
-sentence-transformers==2.2.2
-transformers==4.44.2
-huggingface-hub==0.35.3
+langchain
+langchain-core
+langchain-community
+langchain-huggingface
+langchain-google-genai
+langchain-text-splitters
+sentence-transformers
+transformers
+huggingface-hub
 torch
 
 faiss-cpu
