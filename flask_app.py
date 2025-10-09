@@ -1,4 +1,4 @@
-"""Flask App script for RAG chatbot (optimize for low memory)"""
+"""Flask App script for RAG chatbot"""
 
 import gc
 import os
@@ -6,15 +6,18 @@ import re
 import tempfile
 from flask import Flask, request, jsonify, render_template
 
-# Flask app
+
+# Flask app initialization
 app = Flask(__name__, template_folder="templates", static_folder="static")
+
 
 # Global states
 retriever = None
 LLM_model = None
 api_key = None  # API key will come from frontend
 
-# System message
+
+# Set system message
 SYSTEM_MESSAGE = """
 You are RAG Assistant for the provided document. 
 Your role is to help users understand and explore the content of uploaded documents.
@@ -27,7 +30,8 @@ Rules:
 """
 
 
-# --- ROUTES ---
+
+# routes
 @app.route("/")
 def home():
     return render_template("chat_page.html")
@@ -55,12 +59,12 @@ def upload_file():
     if file.filename == "":
         return "Empty filename", 400
 
-    # Save file temporarily
+    # save file temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file.filename.split('.')[-1]}") as tmp_file:
         file.save(tmp_file.name)
         file_path = tmp_file.name
 
-    # Load document
+    # load document
     if file.filename.lower().endswith(".pdf"):
         loader = PyPDFLoader(file_path)
     else:
@@ -70,11 +74,11 @@ def upload_file():
     if not documents:
         return "No content found in the document", 400
 
-    # Split document into chunks
+    # split document into chunks
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = splitter.split_documents(documents)
 
-    # Embeddings and retriever
+    # embeddings and retriever
     embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
     vector_store = FAISS.from_documents(chunks, embeds)
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
@@ -82,7 +86,7 @@ def upload_file():
     # Initialize chat model
     LLM_model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key)
 
-    # Clean up
+    # clean up memory and sorts
     del documents, chunks, vector_store
     gc.collect()
 
@@ -109,7 +113,7 @@ def chat():
     retrieved_docs = retriever.invoke(question)
     context_text = "\n\n".join(doc.page_content for doc in retrieved_docs)
 
-    # Build prompt
+    # prompt template
     prompt_template = PromptTemplate(
         template=(
             "You are answering strictly based on this document.\n\n"
