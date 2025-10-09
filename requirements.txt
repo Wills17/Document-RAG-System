@@ -10,8 +10,6 @@ sentence-transformers
 transformers
 huggingface-hub
 torch
-
 faiss-cpu
-
 pypdf 
 python-dotenv

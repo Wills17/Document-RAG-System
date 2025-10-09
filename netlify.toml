@@ -1,6 +1,0 @@
-[build]
-  command = "pip install -r requirements.txt && gunicorn flask_app:app"
-  publish = "."
-
-[build.environment]
-  PYTHON_VERSION = "3.11"
