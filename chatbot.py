@@ -13,6 +13,10 @@ from langchain_core.runnables import RunnableParallel, RunnableLambda, RunnableP
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_huggingface import HuggingFaceEmbeddings
 
+# Variables for global use
+chunk_size=1000
+chunk_overlap=100
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -40,7 +44,7 @@ documents = loader.load()
 
 
 # Split text into chunks
-splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 chunks = splitter.split_documents(documents)
 
 
