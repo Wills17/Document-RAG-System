@@ -16,6 +16,17 @@ from langchain_huggingface import HuggingFaceEmbeddings
 # Variables for global use
 chunk_size=1000
 chunk_overlap=100
+model_name= "sentence-transformers/all-MiniLM-L6-v2"
+
+System_Message = """
+You are RAG Assistant for the provided document. 
+Your role is to help users understand and explore the content of uploaded documents.
+
+Follow these rules:
+1. Always prioritize the document context when answering questions.
+2. If the answer is not in the document, clearly say you don't know.
+3. Keep responses friendly, clear, and concise.
+"""
 
 
 # Load environment variables from .env file
@@ -49,7 +60,7 @@ chunks = splitter.split_documents(documents)
 
 
 # embeddings + retriever
-embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+embeds = HuggingFaceEmbeddings(model_name=model_name)
 vector_store = FAISS.from_documents(chunks, embeds)
 retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 5})
 
@@ -58,16 +69,6 @@ LLM = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=api_key
 )
-
-System_Message = """
-You are RAG Assistant for the provided document. 
-Your role is to help users understand and explore the content of uploaded documents.
-
-Follow these rules:
-1. Always prioritize the document context when answering questions.
-2. If the answer is not in the document, clearly say you don't know.
-3. Keep responses friendly, clear, and concise.
-"""
 
 # Initialize chat history
 messages = [SystemMessage(content=System_Message)]
