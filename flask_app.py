@@ -6,6 +6,12 @@ import re
 import tempfile
 from flask import Flask, request, jsonify, render_template
 
+# Pre-download and save the embedding model
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("sentence-transformers/paraphrase-MiniLM-L3-v2")
+model.save("models/paraphrase-MiniLM-L3-v2")
+
+
 # Disable CUDA and excessive parallel threads to save memory
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -85,7 +91,8 @@ def upload_file():
 
     # Light embedding model (fast + low memory)
     try:
-        embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
+        # embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
+        embeds = HuggingFaceEmbeddings(model_name="./models/paraphrase-MiniLM-L3-v2")  # local model (offline)
         vector_store = FAISS.from_documents(chunks, embeds)
         retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
         
