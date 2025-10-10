@@ -6,10 +6,10 @@ import re
 import tempfile
 from flask import Flask, request, jsonify, render_template
 
-# Pre-download and save the embedding model
-from sentence_transformers import SentenceTransformer
-model = SentenceTransformer("sentence-transformers/paraphrase-MiniLM-L3-v2")
-model.save("models/paraphrase-MiniLM-L3-v2")
+# # Pre-download and save the embedding model
+# from sentence_transformers import SentenceTransformer
+# model = SentenceTransformer("sentence-transformers/paraphrase-MiniLM-L3-v2")
+# model.save("models/paraphrase-MiniLM-L3-v2")
 
 
 # Disable CUDA and excessive parallel threads to save memory
