@@ -105,6 +105,11 @@ async function handleFile(file) {
     const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) {
         showToast('Please enter and save your Gemini API key before uploading.', 'error');
+        // Add delay for second toast
+         setTimeout(() => {
+            showToast('See the help button at the top for details.', 'error');
+        }, 3000); 
+
         return;
     }
 
