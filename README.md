@@ -1,4 +1,4 @@
-# Document RAG Chatbot
+# Ask Your Doc
 
 An intelligent, context-aware chatbot that understands your documents.  
 Upload a PDF or text file, and it will answer questions using only the information inside — no hallucinations, no fluff.  
@@ -9,7 +9,7 @@ Built with **Flask**, **LangChain**, and **Google Gemini**, this project demonst
 
 ## Live Demo
 
-Try it live here 👉 [**Document RAG Chatbot Demo**](https://wills17-document-rag-system.hf.space//)
+Try it live here 👉 [**Ask Your Doc Demo**](https://wills17-document-rag-system.hf.space//)
 
 > You’ll need your own **Gemini API Key** - the app will prompt you to enter it before use.
 
