@@ -50,70 +50,71 @@ def upload_file():
     """Route handling document upload, splitting, chunking, and vectorization."""
     
     global retriever, LLM_model, api_key
-
-    # Import heavy dependencies only when needed
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
-    from langchain_community.vectorstores import FAISS
-    from langchain_community.document_loaders import TextLoader, PyPDFLoader
-    from langchain_huggingface import HuggingFaceEmbeddings
-    from langchain_google_genai import ChatGoogleGenerativeAI
-
+    
+    try:
+        # Import heavy dependencies only when needed
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        from langchain_community.vectorstores import FAISS
+        from langchain_community.document_loaders import TextLoader, PyPDFLoader
+        from langchain_huggingface import HuggingFaceEmbeddings
+        from langchain_google_genai import ChatGoogleGenerativeAI
+    except Exception as e:
+        return jsonify({"error": f"Missing dependency: {e}"}), 500
+    
+    
+    # Get user API key
     api_key = request.form.get("apiKey")
     if not api_key:
-        return "API key missing!", 400
+        return jsonify({"error": "API key missing!"}), 400
 
     uploaded = request.files.get("file")
     if not uploaded or uploaded.filename.strip() == "":
-        return "No file uploaded", 400
+        return jsonify({"error": "No file uploaded."}), 400
 
     ext = uploaded.filename.rsplit(".", 1)[-1].lower()
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as tmp_file:
-        uploaded.save(tmp_file.name)
-        path = tmp_file.name
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as tmp:
+        uploaded.save(tmp.name)
+        path = tmp.name
 
-    # load document
+    # Load document
     try:
         loader = PyPDFLoader(path) if ext == "pdf" else TextLoader(path)
         documents = loader.load()
     except Exception as e:
         os.unlink(path)
-        return f"Failed to read document: {e}", 400
+        return jsonify({"error": f"Failed to read document: {e}"}), 400
 
     if not documents:
         os.unlink(path)
-        return "No readable content found in the document.", 400
+        return jsonify({"error": "No readable content found in the document."}), 400
 
-
-    # split document into chunks
-    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100) # reduce chunk_size for low memory
+    # Split document into smaller chunks
+    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
     chunks = splitter.split_documents(documents)
 
-
-    # Light embedding model (fast + low memory)
+    # Create embeddings & vector store
     try:
         embeds = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
-        # embeds = HuggingFaceEmbeddings(model_name="./models/paraphrase-MiniLM-L3-v2")  # local model (offline)
+        embeds = HuggingFaceEmbeddings(model_name="./models/paraphrase-MiniLM-L3-v2")  # local model (offline)
         vector_store = FAISS.from_documents(chunks, embeds)
         retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 5})
         
     except Exception as e:
         os.unlink(path)
-        return f"Embedding model failed: {e}", 500
+        return jsonify({"error": f"Embedding model failed: {e}"}), 500
 
-
-    # Initialize chat model
+    # Initialize Gemini model
     try:
         LLM_model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key)
     except Exception as e:
-        return f"Failed to initialize chat model: {e}", 500
+        return jsonify({"error": f"Failed to initialize chat model: {e}"}), 500
 
-
-    # Cleanup temp file
+    # Cleanup
     os.unlink(path)
     del documents, chunks, vector_store
     gc.collect()
 
-    return "Document processed successfully! You can now ask questions."
+    return jsonify({"message": "Document processed successfully! You can now ask questions."})
 
 
 @app.route("/chat", methods=["POST"])
@@ -167,14 +168,12 @@ def chat():
         response = f"Error generating response: {str(e)}"
 
     # Clean markdown artifacts
-    cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", response)
-    cleaned = re.sub(r"\*(.*?)\*", r"\1", cleaned)
+    cleaned = re.sub(r"[*_`#]+", "", response)
 
     gc.collect()
     return jsonify({"answer": cleaned})
 
 
-# run app
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 7860))
     app.run(host="0.0.0.0", port=port, debug=False)
