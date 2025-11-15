@@ -126,7 +126,6 @@ You can tweak:
 
 **Williams Odunayo**
 *Machine Learning Engineer | Builder of useful AI systems*😉
-🔗 [GitHub](https://github.com/Wills17) • [LinkedIn](https://linkedin.com/in/williamsodunayo)
 
 
 ---
