@@ -50,7 +50,7 @@ cd Document-RAG-System
 ### 2️⃣ Set Up Your Environment
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 # Activate
 venv\Scripts\activate     # Windows
 source venv/bin/activate  # macOS/Linux
@@ -59,7 +59,7 @@ source venv/bin/activate  # macOS/Linux
 ### 3️⃣ Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 ---
@@ -67,7 +67,7 @@ pip install -r requirements.txt
 ##  Run the App
 
 ```bash
-python flask_app.py
+python3 flask_app.py
 ```
 
 Once running, open your browser and go to:
