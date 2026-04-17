@@ -9,7 +9,7 @@ Built with **Flask**, **LangChain**, and **Google Gemini**, this project demonst
 
 ## Live Demo
 
-Try it live here 👉 [**Ask Your Doc Demo**](https://wills17-document-rag-system.hf.space/)
+Try it live here 👉 [**Ask Your Doc Demo**](https://wills17-ask-your-doc.hf.space/)
 
 > You’ll need your own **Gemini API Key** - the app will prompt you to enter it before use.
 
